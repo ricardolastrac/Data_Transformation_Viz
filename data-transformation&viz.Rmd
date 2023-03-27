@@ -1077,6 +1077,48 @@ market
 ```
 &nbsp;
 
+Hacemos algunas graficas ya un poco conocidas...
+
+```{r , warning=F, error=F, message=F}
+ggplot(market, aes(x = Año, y = Litros)) +
+  geom_col(aes(color = Category, fill = Category), position = position_stack())
+```
+&nbsp;
+
+de mis favoritas...
+
+```{r , warning=F, error=F, message=F}
+# Multiple line plot
+ggplot(market, aes(x = Año, y = Litros)) + 
+  geom_line(aes(color = Category), size = 1) +
+  theme_minimal()
+```
+&nbsp;
+
+Le subimos el volumen!!! Su primera regresión...
+
+```{r , warning=F, error=F, message=F}
+#Obtenemos los datos de CHEM@
+emi_chema <- emision %>%
+  filter(Nombre.Director == "CHEMA",
+         Año.Contable != "2019") %>%
+  group_by(Nombre.Director, Año.Contable) %>%
+  summarise(Prima_E = sum(Emitida),
+            Prima_P = sum(Pagada))
+#Una regresion lineal sencilla
+#Obtenemos los coeficientes
+regresion <- lm(Prima_E~Año.Contable, data = emi_chema)
+#Ajustamos
+emi_chema$prediccion <- predict(regresion)
+
+#De mejor interpretación
+p1 <- ggplot(emi_chema, aes(x = Año.Contable, y = Prima_E))
+
+p1 + geom_point() +
+  scale_x_continuous(limits = c(2016, 2018)) +
+  geom_line(aes(y = prediccion))
+```
+
 
 ### Bonus
 
