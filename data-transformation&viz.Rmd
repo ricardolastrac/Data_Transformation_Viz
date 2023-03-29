@@ -645,6 +645,18 @@ summary(pack_type)
 ```
 &nbsp;
 
+Repaso.
+
+`Dplyr` Es una libreria de R para manejo, transformación y control de datos. COnsiste en una serie de funciones que nos permiten de forma sencilla y simplificada escribir pipelines de datos (en el mundo de `SQL` mejor conocidos como `querys`).
+
+Estas transformaciones son mejor conocidas como `Data manipulation` ó `Data wrangling`. Esta forma de manipular datos combina naturalmente verbos en inglés que hacen referencia a la funcionalidad que se trata de emplear directo al dato. 
+
+El amplio workspace que `R`maneja a traves de su extensa comunidad permite que `Dplyr` pueda ser desarrollado con amplio y basto numero de referencias para el desarrollo de codigo para manipulación de datos.
+
+Adicionalmente `Dplyr`  cuenta con interacciones con otras librerias, lenguajes y plataformas de uso y manipulación de datos. Es posible traducir con la libreria `dbplyr` pipes de `Dplyr` hacia "queries" de `SQL`; o también con la libreria `dtplyr` manejar volumenes grandes de datos en "memoria", esto a traves de la traducción de pipes a codigo eficiente de  `data.table`.
+
+&nbsp;
+
 **Verbos de `dplyr` que usaremos:**
   
 * mutate() adds new variables that are functions of existing variables
@@ -862,7 +874,7 @@ library(ggplot2)
 Si *NO* pudieron cargar `tidyverse`, descarguen `ggplot2` y habiliten la libreria.
 
 ```{r, eval=FALSE}
-install.packages("ggplot2")
+#install.packages("ggplot2")
 library(ggplot2)
 ```
 
@@ -944,7 +956,17 @@ help.search("geom_", package = "ggplot2")
 
 &nbsp;
 
-Pongamos datos reales...
+Pongamos datos que hagan sentido, para esto ocupamos `Dplyr`, lo que nos permitira tener resumenes/vistas de nuestros datos para una mejor presentación. 
+
+Graficar datos, es mostrar los resumenes deseados desde una forma visual mas atractiva y dinamica. Recordando:
+
+"El cerebro es capaz de procesar la información que captan nuestros ojos en milésimas de segundo. Un estudio realizado por el CSIC analiza cómo estos circuitos neuronales son capaces de procesar imágenes de forma tan eficaz.
+
+Desde que observamos una imagen con nuestros ojos, hasta que nuestro cerebro es capaz de procesar la información visual recibida, pasan apenas unas milésimas de segundo. Este tiempo es suficiente para que nuestros circuitos neuronales sean capaces de transmitir y enviar las órdenes al organismo.
+
+Y es que el sentido de la vista es fundamental para que podamos llevar a cabo acciones y ejecutar movimientos. Sin él, nos resultaría mucho más complejo «entender» el mundo que nos rodea y realizar tareas tan básicas como caminar, desplazar nuestro cuerpo en una determinada habitación o reconocer el rostro de un conocido.
+
+El mejor procesador de imágenes que tenemos, nuestro cerebro, necesita por tanto alcanzar un equilibrio óptimo entre tamaño y resolución para que podamos ver y analizar bien las escenas que observamos. Solo con este sofisticado sistema podemos llegar a contemplar todo lo que sucede ante nuestros ojos, un conocimiento que se creía impensable hace un siglo. Los avances en investigación no podrán únicamente mejorar nuestras ideas sobre el cerebro, sino también avanzar en el desarrollo de nuevas tecnologías inspiradas en nuestra mente."
 
 &nbsp;
 
@@ -1015,6 +1037,7 @@ Volvemos a ordenar el set original, ojo con la función `gather`.
 Para mas información busquen referencias en "tidyr" relacionadas a `gather` y `spread`.
 
 ```{r , warning=F, error=F, message=F}
+library(tidyr)
 market <- read_csv("data/Market_size.csv", skip = 5)
 market<- market %>%
   mutate(across(6:12, as.numeric)) %>%
@@ -1056,10 +1079,10 @@ ggplot(market, aes(y = Precios, x = Año, colour = Category)) +
   xlab("Año contable")+
   scale_size(range = c(0.5, 16))  #Ajusta el tamaño de los circulos
 ```
+
 &nbsp;
 
 Reordenamos datos, y permitimos tener la categoria de precios y litros.
-
 
 ```{r , warning=F, error=F, message=F}
 market <- read_csv("data/Market_size.csv", skip = 5)
@@ -1097,29 +1120,488 @@ ggplot(market, aes(x = Año, y = Litros)) +
 
 Le subimos el volumen!!! Su primera regresión...
 
+Nos detendremos un poco a comentar....
+
+&nbsp;
+
+**Regresión**
+
+Es un modelo matemático usado para aproximar la relación de dependencia entre una variable dependiente $Y$, las variables independientes $Xi$ y un término aleatorio. La regresion tiene como objetivo predecir observaciones futuras.
+
+La ecuación general se puede representar de la siguiente forma:
+
+$Y=β0+∑ βiXi+ϵi$
+
+donde  $β$  representa las estimaciones de parámetros lineales que se deben calcular y  $ϵ$  representa los términos de error.
+
+&nbsp;
+
+Existen diferentes tipos de regresiones lineales como son:
+
+  + Regresión lineal simple: modelos que utilizan un único predictor. La ecuación general es:
+
+$Y=β0+βiX+ϵi$
+
+  + Regresión lineal múltiple: modelos que utilizan múltiples predictores. Esta regresión tiene múltiples  $Xi$  para predecir la respuesta,  $Y$ . Este es un ejemplo de la ecuación:
+
+$Y=β0+β1X1+β2X2+ϵ$
+
+  + Regresión lineal multivariante: modelos para varias variables de respuesta. Esta regresión tiene múltiples $Yi$ que derivan de los mismos datos $Y$. Se expresan con fórmulas diferentes. Este es un ejemplo del sistema con 2 ecuaciones:
+
+$Y1=β01+β11X1+ϵ1$
+ 
+$Y2=β02+β12X1+ϵ2$
+
+Regresión lineal múltiple multivariante: modelos que utilizan varios predictores para múltiples variables de respuesta. Esta regresión tiene múltiples  $Xi$  para predecir varias respuestas  $Yi$.
+
+
 ```{r , warning=F, error=F, message=F}
-#Obtenemos los datos de CHEM@
-emi_chema <- emision %>%
-  filter(Nombre.Director == "CHEMA",
-         Año.Contable != "2019") %>%
-  group_by(Nombre.Director, Año.Contable) %>%
-  summarise(Prima_E = sum(Emitida),
-            Prima_P = sum(Pagada))
+#Obtenemos los datos de aguas embotelladas para predicir el dato del 2024
+agua_e <- market %>%
+  filter(Category == "Bottled Water") %>%
+  group_by(Category, Año) 
 #Una regresion lineal sencilla
 #Obtenemos los coeficientes
-regresion <- lm(Prima_E~Año.Contable, data = emi_chema)
+regresion <- lm(`Current Prices`~Año, data = agua_e)
 #Ajustamos
-emi_chema$prediccion <- predict(regresion)
+agua_e$prediccion <- predict(regresion)
 
 #De mejor interpretación
-p1 <- ggplot(emi_chema, aes(x = Año.Contable, y = Prima_E))
+p1 <- ggplot(agua_e, aes(x = Año, y = `Current Prices`))
 
 p1 + geom_point() +
-  scale_x_continuous(limits = c(2016, 2018)) +
+  scale_x_continuous(limits = c(2016, 2024)) +
   geom_line(aes(y = prediccion))
 ```
 
+&nbsp;
+
+Agregamos unas bandas de confianza representadas por una sombra, y pintamos nuestros datos en "azul"...
+
+```{r , warning=F, error=F, message=F}
+p1 + geom_point() +
+  scale_x_continuous(limits = c(2016, 2024)) +
+  geom_line(aes(y = prediccion)) +
+  geom_smooth()
+```
+&nbsp;
+
+...pero y el año 2024 y el 2025 como va a cerrar? en donde esta la predicción/estimación?
+
+Ideas??
+
+&nbsp;
+
+Seguimos con la magia!!!
+
+&nbsp;
+
+```{r , warning=F, error=F, message=F}
+conf1 <- predict(regresion,interval="confidence")
+pred1 <- predict(regresion,interval="prediction")
+```
+
+Pasamos los siguientes dos años...  (づ｡◕‿‿◕｡)づ
+
+```{r , warning=F, error=F, message=F}
+new <- data.frame(Año=seq(2024,2025,length=2))
+conf2 <- predict(regresion,interval="confidence",newdata=new)
+pred2 <- predict(regresion,interval="prediction",newdata=new)
+new$prediccion <- predict(regresion,newdata=new)
+new
+```
+
+&nbsp;
+
+y lo graficamos para que se entienda mejor
+
+```{r , warning=F, error=F, message=F}
+agua_e_pred <-bind_rows(agua_e,new)
+p2 <- ggplot(agua_e_pred, aes(x = Año, y = `Current Prices`))
+p2 + geom_point(size= 2) +
+  scale_x_continuous(limits = c(2016, 2026)) +
+  geom_line(aes(y = prediccion)) +
+  geom_point(aes(y = prediccion),color= "blue", size= 3, alpha = 0.4) 
+```
+&nbsp;
+
+revisamos el detalle que nos da el objeto `lm`, las bandas de confianza y de predicción
+
+```{r , warning=F, error=F, message=F}
+par(las=1,bty="l") ## formato
+plot(`Current Prices`~Año,data=agua_e,ylim=c(5000,12000),xlim=c(2016,2024)) ## datos originales
+abline(regresion) ## ajuste del modelo
+matlines(agua_e$Año,conf1[,c("lwr","upr")],col=2,lty=1,type="b",pch="+")
+matlines(agua_e$Año,pred1[,c("lwr","upr")],col=2,lty=2,type="b",pch=1)
+matlines(new$Año,conf2[,c("lwr","upr")],col=4,lty=1,type="b",pch="+")
+matlines(new$Año,pred2[,c("lwr","upr")],col=4,lty=2,type="b",pch=1)
+```
+&nbsp;
+
+Mas ideas, revisen el siguiente [link.](https://www.datanovia.com/en/blog/ggplot-examples-best-reference/)
+
+Buenisimos tutoriales, muchas gracias a los amigos de datanovia!!!
+
+Ademas pueden revisar el documento de apoyo data-visualization-2.1.pdf que esta en el repo del Workshop.
+
+&nbsp;
 
 ### Bonus
 
 `OBJETIVO:` **Mostrarles que aún hay mas cosas en el universo de `R` y generar mas ideas para sus proyectos.**
+
+&nbsp;
+
+####  A. Strings
+
+Los *strings* son cualquier valor que se encuentre entre comillas ó comillas sencillas. A estos valores `R` los trata como *strings*, se almacenan entre comillas aunque en la UI solo se vean comillas sencillas.
+
+
+```{r , warning=F, error=F, message=F}   
+a <- 'Empieza y termina con comilla sencilla'
+a
+
+b <- "Empieza y termina con comillas"
+b
+
+c <- "Comilla sencilla ' en medio de comillas"
+c
+
+d <- 'Comillas " en medio de comilla sencilla al inicio y al final'
+d
+```
+
+Ejemplo de *strings* invalidos:
+
+```{r , eval=F} 
+e <- 'Comillas mezcladas" 
+Resultado:
+INCOMPLETE_STRING
+```
+```{r , eval=F} 
+f <- 'Una comilla sencilla ' dentro de otras comillas sencillas'
+Resultado:
+INCOMPLETE_STRING
+```
+```{r , eval=F} 
+g <- "Comillas " dentro de comillas dobles"
+Resultado:
+INCOMPLETE_STRING
+```
+
+Para concatenar strings usamos algo muy sencillo `paste`
+
+```{r } 
+a <- "D00"
+b <- '1234'
+c <- "2019 1"
+
+print(paste(a,b,c))
+
+print(paste(a,b,c, sep = "-"))
+
+print(paste(a,b,c, sep = "", collapse = ""))
+```
+Para formatear los strings también usamos algo sencillo:
+
+```{r } 
+# Justificar a la Izquierda
+cadena <- format("Cuota", width = 6, justify = "l")
+cadena
+
+# Justificar al centro
+cadena <- format("Cuota", width = 9, justify = "c")
+cadena
+```
+Podemos contar los caracteres de una oración con `nchar()`
+
+```{r } 
+cadena2 <- nchar("Prima Emitida en $ usd...")
+cadena2
+```
+Podemos cambiar a mayúsculas o minúsculas.
+```{r } 
+toupper(cadena)
+```
+```{r } 
+tolower(cadena)
+```
+Por ultimo podemos hacer substrings más cortos de uno ya existente
+
+```{r }
+# Extraer caracteres de la 5ta a la  7th posición
+cadena3 <- substring("Ricardo Lastra", 5, 7)
+cadena3
+```
+
+Adicional a R base pueden revisar la libreria `stringr` cuya sintaxis es muy amigable, esta dentro del universo Tidy que ya conocemos. 
+
+Pueden consultar el siguiente link https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html
+
+&nbsp;
+
+**REGEX**
+
+Relacionado al tema, tambien revisen un buen tutorial de REGEX ó expresiones regulares, será de gran ayuda!!!
+
+https://tutorialzine.com/2014/12/learn-regular-expressions-in-20-minutes
+
+
+Herramienta para probar y depurar expresiones regulares.
+
+https://regex101.com/
+
+&nbsp;
+  
+####  B. Fechas
+  
+  Son de las cosas que más dolores de cabeza les dan a algunos, sin embargo hay librerías que lo hacen sencillo, las fechas son difíciles de manejar por los formatos en los que cada sistema las almacena, este no depende de los sistemas, sino de la necesidad del usuario, de la zona horaria, y en algunos casos son solo días, meses o horas con minutos y segundos los que se necesitan.  
+  
+  Una magnifica libreria es `lubridate` la cual soporta instantes, intervalos, duraciones y periodos.
+  
+```{r , warning=F, error=F, message=F}  
+fecha <- Sys.Date()
+fechas <- seq(fecha, length.out=12, by = "1 month")
+fechas
+```
+
+más ejemplos...
+
+Accedemos al formato `dd/mm/aaaa` con la funcion **dmy** y obtenemos el mes de la fecha de nacimiento:
+
+```{r , warning=F, error=F, message=F}
+library(lubridate)
+bday <- dmy("29/05/1986")
+month(bday)
+```
+
+Accedemos al día de la semana de ese año:
+
+```{r , warning=F, error=F, message=F}
+wday(bday)
+```
+
+Y accedemos también al dia del año actual:
+
+```{r , warning=F, error=F, message=F}
+year(bday) <- 2019
+wday(bday)
+```
+&nbsp;
+
+Y en formato `aaaa/mm/dd hr:min:seg` con la funcion **ymd_hms** y obtenemos el mes de la fecha de esta forma:
+
+```{r , warning=F, error=F, message=F}
+time <- ymd_hms("2019-06-25 15:30:30")
+time
+```
+Funciones de ayuda para manipular time zones: with_tz(), force_tz()
+
+```{r , warning=F, error=F, message=F}
+# Changes printing
+with_tz(time, "America/Chicago")
+```
+
+```{r , warning=F, error=F, message=F}
+# Changes time
+force_tz(time, "America/Chicago")
+```
+
+&nbsp;
+
+
+####  C. Factores
+  
+  Cuando uno quiere analizar datos, regularmente necesita variables que funcionan como etiquetas. Estas etiquetas pueden ser contadas, pero no sumadas. A este tipo de variables se les conoce como variables categóricas y en R se llaman factores.
+
+```{r , warning=F, error=F, message=F}  
+mascotas <- c("P", "G", "P", "P", "G", "P")
+mascotas <- factor(mascotas)
+mascotas
+```
+
+```{r , warning=F, error=F, message=F}  
+mascotas <- factor(c("P", "G", "P", "P", "G", "P","G"), levels=c("G", "P"), labels=c("GATO", "PERRO"))
+mascotas
+```  
+
+&nbsp;
+
+####  D. Paleta de colores
+  
+  En el mundo visual, para tunnear nuestros graficos, la libreria "RColorBrewer" es una herramienta basica, contiene
+
+```{r , warning=F, error=F, message=F}
+#install.packages("RcolorBrewer")
+library(RColorBrewer)
+#create a sequential palette for usage and show colors
+mypalette<-brewer.pal(7,"Greens")
+image(1:7,1,as.matrix(1:7),col=mypalette,xlab="Tonos de Verde",
+       ylab="",xaxt="n",yaxt="n",bty="n")
+```  
+```{r , warning=F, error=F, message=F}
+## display a qualitative palette
+display.brewer.pal(7,"Accent")
+``` 
+
+Mas información en: https://www.rdocumentation.org/packages/RColorBrewer/versions/1.1-2/topics/RColorBrewer
+
+####  E. Listas
+  
+Algo muy util en programación orientada a objetos son las listas, son parecidas a los vectores, pero con una diferencia importante: pueden tener los elementos de diferentes tipos.
+
+```{r , warning=F, error=F, message=F}
+lista <- list(1, 2, 3, 4, 5)
+lista
+```
+&nbsp;
+
+El operador de extracción ([), devuelve una lista
+
+
+```{r , warning=F, error=F, message=F}
+lista[1]
+```
+
+```{r , warning=F, error=F, message=F}
+is.list(lista[1])
+```
+
+```{r , warning=F, error=F, message=F}
+is.vector(lista[1])
+```
+&nbsp;
+
+El operador [[ devuelve un vector
+
+```{r , warning=F, error=F, message=F}
+lista[[1]]
+```
+
+```{r , warning=F, error=F, message=F}
+is.list(lista[[1]])
+```
+
+```{r , warning=F, error=F, message=F}
+is.vector(lista[[1]])
+```
+
+&nbsp;
+
+Asi es como se ven los diferentes datos de 
+
+```{r , warning=F, error=F, message=F}
+renta <- list(direccion="Masarik 306", m2=c(10, 15, 3), dlls.men=2500)
+renta
+```
+&nbsp;
+
+Existe otro operador de acceso: $ (lo vimos en sesiones pasadas también)
+
+
+```{r , warning=F, error=F, message=F}
+renta$dlls.men
+```
+
+
+```{r , warning=F, error=F, message=F}
+renta[3]
+```
+
+
+```{r , warning=F, error=F, message=F}
+renta[[2]]
+```
+
+&nbsp;
+  
+####  F. Mapas interactivos.
+
+Para crear visualizaciones muy buenas a través de mapas, existe `leaflet`, la cual es una librería creada por los amigos de *Rstudio* para integrarla a la distribución del mismo nombre creada en JavaScript.
+
+Es súper interesante este tema, ya que podemos generar mapas interactivos, integrarlos en una APP, publicarlos en línea o hasta ponerlos en nuestro reporte RMD.
+
+Esencialmente el paquete te permite generar mapas con configuraciones personales de map tiles, markers, polygons, lines, popups, y objetos geojson. Casi todo lo que conocemos de Google Fusion Tables o Carto(DB) en esta parte de mapas, ustedes lo pueden hacer usando R y el paquete de `leaflet`.
+
+Aquí un buen ejemplo!!!
+
+```{r warning=F, error=F, message=F}
+#install.packages("leaflet")
+library(leaflet)
+# Initialize and assign m as the leaflet object
+m <- leaflet() %>%
+# Now add tiles to it
+    addTiles() %>%  
+# Setting the middle of where the map should be and the zoom level
+    setView(lng=-99.2609819, lat=19.3592552, zoom = 16) %>%
+# Now, add a marker with a popup, 
+    addMarkers(lng=-99.2609819, lat=19.3592552, popup="<b>Hola Workshop</b><br><a href='https://www.washingtonpost.com'>-Link_a_sitio_relacionado_con_ubicación</a>")
+
+m 
+```
+
+En donde esta el marcador?? jejeje   ⊂(◉‿◉)つ
+
+&nbsp;
+
+Un ultimo regalo!!!
+
+
+```{r , warning=F, error=F, message=F}
+#install.packages("wordcloud")
+library(wordcloud)
+#install.packages("RColorBrewer")
+library(RColorBrewer)
+#install.packages("wordcloud2")
+library(wordcloud2)
+#install.packages("tm")
+library(tm)
+#Create a vector containing only the text
+market <- read_csv("data/Market_size.csv", skip = 5)
+text <- market$Category
+# Create a corpus  
+docs <- Corpus(VectorSource(text))
+# Have a dataframe containing each word in your first column and their #frequency in the second column
+dtm <- TermDocumentMatrix(docs) 
+matrix <- as.matrix(dtm) 
+words <- sort(rowSums(matrix),decreasing=TRUE) 
+df <- data.frame(word = names(words),freq=words)
+# Generate the wordcloud
+set.seed(1234) # for reproducibility 
+wordcloud(words = df$word, freq = df$freq, min.freq = 1,           max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
+```
+
+
+Aplausos!!!!!!
+
+
+&nbsp;
+  
+####  F. Intermedios-Avanzados R
+    
+    i) Shiny
+    ii) Simulación
+    iii) Web Scrapping
+    iv) Algoritmos de ML
+    v) Algoritmos de Texto
+    vi) Creando paqueterias
+    vii) Programación en Paralelo
+    viii) API´s
+    
+&nbsp;
+
+####  G. Otras herramientas
+    
+    i) Git
+    ii) Spark & Keras
+    iii) SQLite, JS, C, C#
+    iv) Docker
+    v) Bash programming, paralelo
+    vi) Computo Cloud / AWS (Amazon cloud services) / AZURE (Microsoft)
+    
+Muchas gracias!!!
+
+&nbsp;
+
+
+
