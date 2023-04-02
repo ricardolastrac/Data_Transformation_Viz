@@ -1,0 +1,141 @@
+---
+title: "examen"
+author: "Paulina Gonzalez Bustamante"
+date: "2023-03-31"
+output: html_document
+---
+1. Genera un `Query` que seleccione la columna `Address` de la tabla `Customers`. 
+
+```sql
+LOAD DATA INFILE 'path/to/csv/file.csv'
+INTO TABLE table_name
+```
+
+&nbsp;
+
+2. Genera un `Query` que seleccione todos los diferentes valores de la columna `City` de la tabla `Customers`. 
+
+```sql
+SELECT * FROM [Customers]
+WHERE '' NOT LIKE 'City';
+```
+&nbsp;
+
+3. Genera un `Query` que seleccione todos los registros en donde la columna `City` tenga los valores de `Berlin` ó `Madrid`. 
+
+```sql
+SELECT * FROM [Customers]
+WHERE City IN ('Berlin','Madrid');
+```
+&nbsp;
+
+4. Completa el siguiente `Query`, elije el JOIN correcto que seleccione todos los registros de la tabla `Customers` mas todas las coincidencias en la tabla `Orders`. 
+
+```sql
+SELECT *
+FROM Orders
+INNER JOIN Customers
+ON Orders.CustomerID=Customers.CustomerID;
+```
+&nbsp;
+
+5. Completa el siguiente `Query`, lista el numero de clientes en cada ciudad, y ordena la lista de acuerdo con el mayor numero de clientes de forma descendente. 
+
+```sql
+SELECT COUNT(CustomerID) AS cantidad_clientes, City
+FROM Customers
+GROUP BY City
+ORDER BY cantidad_clientes DESC;
+```
+###-------------------------------------------------------------- Data Viz (R)-------------------------------
+
+1. Importa los datos del archivo en CSV "Market_size" del repo del curso, estos se usarán para las 4 siguientes preguntas. En este chunk deberás poner todas las librerías utilizadas.
+
+```{r error=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(readr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+market = read_csv("/Users/paulinagonzalez/Desktop/r_kof/Data_Transformation_Viz/data/Market_size.csv", skip = 5)
+```
+
+2. Genera una tabla que muestre los precios del 2023 para México de todas las categorías de bebidas.
+
+```{r echo=FALSE,error=FALSE, message=FALSE, warning=FALSE}
+
+MX2023CAT <- market %>%
+  filter(Geography  == "Mexico") %>%
+  select("Geography", "2023", "Unit", "Category")
+
+MX2023CAT
+
+
+```
+
+3. Genera una tabla que muestre por país y por categoría el precio por litro promedio de bebidas de cada año.
+Hint. Market Size
+```{r}
+#unique(market$Unit)
+#market
+#market = read_csv("/Users/paulinagonzalez/Desktop/r_kof/Data_Transformation_Viz/data/Market_size.csv", skip = 5)
+
+market <- market %>%
+  mutate(across(`2017`:`2023`, as.numeric))
+
+precio_litro <- market %>%
+  group_by(Geography, Category) %>%
+  summarize(precio_2017 = mean(`2017` / if_else(Unit == "million litres", 1, 1000000)),
+            precio_2018 = mean(`2018` / if_else(Unit == "million litres", 1, 1000000)),
+            precio_2019 = mean(`2019` / if_else(Unit == "million litres", 1, 1000000)),
+            precio_2020 = mean(`2020` / if_else(Unit == "million litres", 1, 1000000)),
+            precio_2021 = mean(`2021` / if_else(Unit == "million litres", 1, 1000000)),
+            precio_2022 = mean(`2022` / if_else(Unit == "million litres", 1, 1000000)),
+            precio_2023 = mean(`2023` / if_else(Unit == "million litres", 1, 1000000)))
+
+precio_litro
+str(market)
+
+```
+
+4. A partir de la tabla anterior, genera un gráfico que muestre solo los países que inician con la letra "B" y sus precios por año contable. Recuerda usa tu creatividad, puedes usar geometrías vistas en clase u otras nuevas!
+
+```{r echo=FALSE,error=FALSE, message=FALSE, warning=FALSE}
+# Filtrar solo los países que comienzan con "B"
+market_b <- market %>%
+  filter(str_sub(Geography, 1, 1) == "B")
+
+# Transformar los datos utilizando la función pivot_longer
+market_b_long <- market_b %>%
+  pivot_longer(cols = c("2017", "2018", "2019", "2020", "2021", "2022", "2023"),
+               names_to = "Año",
+               values_to = "Precio")
+
+# Crear el gráfico utilizando la función ggplot
+ggplot(market_b_long, aes(x = Año, y = Precio, color = Geography)) +
+  geom_line() +
+  labs(x = "Año contable", y = "Precio (AZN million)", title = "Precios por país que inicia con B")
+
+
+```
+
+5. Genera un mapa de calor, que muestre al menos 1 de los dos valores numéricos de los datos de Market (Litros o Precios) en función de cualquier variable. Se creativo con los colores!
+
+```{r warning=F, error=F, message=F}
+# Convertir datos a formato adecuado
+market_long <- market %>% 
+  pivot_longer(cols = c( "2022", "2023"), 
+               names_to = "Año", values_to = "Valor") %>%
+  filter(!is.na(Valor)) # Eliminar filas con valores faltantes
+
+# Crear mapa de calor
+ggplot(market_long, aes(x = Geography, y = Año, fill = Valor)) +
+  geom_tile() +
+  scale_fill_gradientn(colors = c("white", "red", "black"),
+                       values = c(0, 0.5, 1),
+                       name = "Valor") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+   
+```
+
+
