@@ -1,0 +1,113 @@
+---
+title: "Examen"
+author: "Ramses Navarro"
+date: "2023-03-31"
+output: html_document
+---
+
+# SQL
+
+##1. Genera un `Query` que seleccione la columna `Address` de la tabla `Customers`. 
+```{sql connection=}
+SELECT Address FROM [Customers]
+```
+
+##2. Genera un `Query` que seleccione todos los diferentes valores de la columna `City` de la tabla `Customers`. 
+```{sql connection=}
+SELECT City FROM [Customers]
+```
+
+##3. Genera un `Query` que seleccione todos los registros en donde la columna `City` tenga los valores de `Berlin` ó `Madrid`. 
+```{sql connection=}
+SELECT * FROM [Customers] where City is "Madrid" or City is "Berlin"
+```
+
+4. Completa el siguiente `Query`, elije el JOIN correcto que seleccione todos los registros de la tabla `Customers` mas todas las coincidencias en la tabla `Orders`. 
+```{sql connection=}
+SELECT *
+FROM Orders
+LEFT JOIN Customers
+ON Orders.CustomerID=Customers.CustomerID;
+```
+
+##5. Completa el siguiente `Query`, lista el numero de clientes en cada ciudad, y ordena la lista de acuerdo con el mayor numero de clientes de forma descendente. 
+```{sql connection=}
+SELECT COUNT(CustomerID),City
+FROM Customers
+GROUP BY (City)
+ORDER BY COUNT(CustomerID) DESC;
+```
+
+# R
+
+## Importar datos / librerias
+```{r}
+library(dplyr)
+library(readr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+tabla = read_csv("/Users/ramsesnavarroramsesnavarro/Desktop/R_KOF/Data_Transformation_Viz/data/Market_size.csv",skip=5)
+
+## Aquí estoy cambiando las columnas 2017-2023, ya que veniían como strings, entonces cree nuevas columnas pero ahora númericas. De esta manera puedo lleva a cabo operaciones númericas. 
+tabla$x2017 <- as.numeric(tabla$`2017`)
+tabla$x2018 <- as.numeric(tabla$`2018`)
+tabla$x2019 <- as.numeric(tabla$`2019`)
+tabla$x2020 <- as.numeric(tabla$`2020`)
+tabla$x2021 <- as.numeric(tabla$`2021`)
+tabla$x2022 <- as.numeric(tabla$`2022`)
+tabla$x2023 <- as.numeric(tabla$`2023`)
+
+tabla <- na.omit(tabla)
+tabla
+```
+
+##2. Genera una tabla que muestre los precios del 2023 para México de todas las categorías de bebidas.
+```{r}
+p2 <- filter(tabla,Geography == "Mexico") %>%
+  select("Geography","Category","x2023")%>%
+    arrange(desc(`x2023`))
+  
+```
+
+##3. Genera una tabla que muestre por país y por categoría el precio por litro promedio de bebidas de cada año.
+```{r}
+p3 <- tabla %>%
+  select(Geography, Category, starts_with("x")) %>%
+  group_by(Geography, Category) %>%
+  summarize(across(starts_with("x"), mean, na.rm = TRUE))
+```
+##4. A partir de la tabla anterior, genera un gráfico que muestre solo los países que inician con la letra "B" y sus precios por año contable. Recuerda usa tu creatividad, puedes usar geometrías vistas en clase u otras nuevas!
+```{r}
+p4 <- p3 %>%
+  filter(str_starts(Geography, "B")) %>%
+  pivot_longer(cols = starts_with("x"), names_to = "year", values_to = "value") %>%
+  mutate(year = factor(year, levels = paste0("x", 2017:2023))) %>%
+  group_by(Geography, year) %>%
+  summarize(avg_value = mean(value, na.rm = TRUE))
+
+ggplot(p4, aes(x = year, y = avg_value, fill = Geography)) +
+  geom_col() +
+  labs(title = "Precios por año con países que empiezan con 'B'",
+       x = "Año",
+       y = "Precio")
+  
+```
+##5. Genera un mapa de calor, que muestre al menos 1 de los dos valores numéricos de los datos de Market (Litros o Precios) en función de cualquier variable. Se creativo con los colores!
+```{r}
+
+
+datos_tabla_reducido <- tabla %>%
+  arrange(desc(`x2022`)) %>%
+  top_n(10)
+
+# Crear el heatmap
+heatmap = ggplot(datos_tabla_reducido, aes(x = Category, y = Geography, fill = x2022)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "red") +
+  labs(title = "Precios por país y categoría en 2017",
+       x = "Categoría",
+       y = "País")+ theme(axis.text.x = element_text(angle = 90, vjust = 0.2))
+heatmap
+```
+
