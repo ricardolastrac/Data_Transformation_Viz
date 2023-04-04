@@ -1,0 +1,88 @@
+# SQL
+
+## Ejercicio 1
+
+library(knitr)
+```{sql}
+SELECT Address
+FROM Customers;
+```
+
+## Ejercicio 2
+```{sql}
+SELECT DISTINCT City
+FROM Customers;
+```
+## Ejercicio 3
+```{sql}
+SELECT *
+FROM Customers
+WHERE City IN ('Berlin', 'Madrid');
+```
+## Ejercicio 4
+```{sql}
+SELECT *
+FROM Orders
+INNER JOIN Customers
+ON Orders.CustomerID=Customers.CustomerID;
+```
+## Ejercicio 5
+```{sql}
+SELECT COUNT(CustomerID) AS NumCustomers, City
+FROM Customers
+GROUP BY City
+ORDER BY COUNT(CustomerID) DESC;
+```
+
+# Data Viz (R)
+```{R}
+#Librerias
+library(dplyr)
+library(readr)
+library(tidyr)
+library(stringr)
+library(tidyverse)
+library(ggplot2)
+```
+
+```{R}
+data <- fread("C:/Users/ssp11/Desktop/IntArt/Data_Transformation_Viz/data/Market_size.csv", skip = 5, , sep = ",", header = T)
+```
+#Ejercicio 2
+```{R}
+tabla1 <- data %>%
+  filter(Geography == "Mexico", `Current Constant` == 'Current Prices')
+```
+#Ejercicio 3
+```{R}
+tabla2 <- data %>%
+  mutate(across(6:12, as.numeric)) %>%
+  filter(`Current Constant` == "Current Prices") %>%
+  group_by(Category) %>%
+  pivot_longer(cols = c(`2017`, `2018`, `2019`, `2020`, `2021`, `2022`, `2023`),
+               names_to = "Year", values_to = "Price") 
+```
+#Ejercicio 4
+```{R}
+tabla3 <- data %>%
+  mutate(across(6:12, as.numeric)) %>%
+  filter(`Current Constant` == "Current Prices") %>%
+  filter(Geography %in% c("Mexico", "Japan", "Panama")) %>%
+  group_by(Category) %>%
+  pivot_longer(cols = c(`2017`, `2018`, `2019`, `2020`, `2021`, `2022`, `2023`),
+               names_to = "Year", values_to = "Price")
+
+ggplot(data = tabla3, aes(x = Year, y = Price, colour = Geography, fill = Geography)) + 
+  geom_bar(stat = "identity", position = "stack")+
+  labs(title = 'Ejercicio 4')
+```
+
+#Ejercicio 5
+```{R}
+#ggplot(tabla2, aes(x = Year, y = Price)) + geom_col(aes(color = Category, fill = Category), position = position_stack())
+my_palette <- c("#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#FFC0CB", "#A52A2A", "#008080", "#800000", "#000080", "#808000", "#FF00FF", "#00FFFF", "#EE82EE", "#4B0082")
+ggplot(tabla2, aes(x = Year, y = Price)) +
+  geom_col(aes(color = Category, fill = Category), position = position_stack()) +
+  scale_color_manual(values = my_palette) +
+  scale_fill_manual(values = my_palette)
+```
