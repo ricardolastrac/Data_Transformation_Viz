@@ -1,0 +1,130 @@
+---
+title: "Examen_Andrea_Ortiz"
+output: html_document
+date: '2023-04-03'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## SQL
+
+```{sql connection=}
+#1
+
+SELECT Address 
+FROM Customers
+
+```
+
+```{sql connection=}
+#2
+
+SELECT DISTINCT City
+FROM Customers
+
+
+```
+
+```{sql connection=}
+#3
+
+SELECT *
+FROM Customers
+WHERE City = "Berlin" OR City = "Madrid"
+
+```
+
+```{sql connection=}
+#4
+
+SELECT *
+FROM Orders
+LEFT JOIN Customers
+ON Orders.CustomerID=Customers.CustomerID;
+
+```
+
+
+```{sql connection=}
+#5
+
+SELECT COUNT (CustomerID) AS numero_clientes ,City
+FROM Customers
+GROUP BY City
+ORDER BY COUNT(CustomerID) DESC;
+
+```
+
+```{r}
+#1. Importa los datos del archivo en CSV “Market_size” del repo del curso, estos se usarán para las 4 siguientes preguntas. En este chunk deberás poner todas las librerías utilizadas.
+
+library(dplyr)
+library(readr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(data.table)
+
+read_csv("C:/Users/andyo/Documents/ia-test/extras_ia/Data_Transformation_Viz/data/Market_size.csv")
+
+market <- fread("C:/Users/andyo/Documents/ia-test/extras_ia/Data_Transformation_Viz/data/Market_size.csv", skip = 5, sep = ",", header = T)
+
+#2. Genera una tabla que muestre los precios del 2023 para México de todas las categorías de bebidas
+
+bebidas_mx <- market %>%
+  select(Geography, Category, '2023')%>%
+  filter(Geography == "Mexico")
+
+#3. Genera una tabla que muestre por país y por categoría el precio por litro promedio de bebidas de cada año
+
+market3 <- market %>%
+  mutate(across(`2017`:`2023`, as.numeric))
+
+precio_litro <- market3 %>%
+  group_by(Geography, Category) %>%
+  summarize(p_2017 = mean(`2017`),
+            p_2018 = mean(`2018`),
+            p_2019 = mean(`2019`),
+            p_2020 = mean(`2020`),
+            p_2021 = mean(`2021`),
+            p_2022 = mean(`2022`),
+            p_2023 = mean(`2023`))
+precio_litro
+str(market)
+
+
+p_litro <- precio_litro %>%
+  summarize(across(starts_with("p"), mean,na.rm=TRUE))
+
+#4. A partir de la tabla anterior, genera un gráfico que muestre solo los países que inician con la letra “B” y sus precios por año contable. Recuerda usa tu creatividad, puedes usar geometrías vistas en clase u otras nuevas
+
+market4 <- read_csv("C:/Users/andyo/Documents/ia-test/extras_ia/Data_Transformation_Viz/data/Market_size.csv", skip = 5)
+
+market4<- market3 %>%
+  mutate(across(6:12, as.numeric)) 
+
+market4<- gather(market4, key = "Año", value = "Prices",
+       (6:12))
+
+market4 <- market4 %>%
+  filter(str_sub(Geography, 1, 1) == "B")%>%
+  mutate(Año= as.numeric(Año)) %>%
+  group_by(Category, Geography, Año) %>%
+  summarise(Precio = sum(Prices,na.rm=TRUE))
+
+ggplot(market4, aes(x = Año, y = Geography, size = Precio, color = Geography)) +
+  geom_point() +
+  scale_size(range = c(0.5, 18))+
+  scale_color_manual(values = c("Bangladesh" = "#e69801", "Belgium" = "#d32a09", "Bolivia" = "#388942", "Brazil" = "#fdee39"))
+
+#5. Genera un mapa de calor, que muestre al menos 1 de los dos valores numéricos de los datos de Market (Litros o Precios) en función de cualquier variable. Se creativo con los colores!
+
+ggplot(market4, aes(x = Año, y = Geography, fill = Precio)) +
+  geom_tile() +
+  scale_fill_gradientn(colors = c("#ffffff", "#eb02a0", "#000000"))+
+  labs(title = "Precio de países que empiezan con 'B' a través de los años")
+
+```
+
