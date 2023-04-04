@@ -18,7 +18,7 @@ Workshop de R, visualizaciones y algo más, desde cero de R para no programadore
 
 ## Examen
 
-*En esta carpeta deberan enviar sus resultados, es individual, un RMD por persona (Carpeta alumnos), deberan hacer pull request de su documento en la carpeta antes del [Viernes 31 de Marzo 11:59 p.m.](examen/)
+*En esta carpeta deberan enviar sus resultados, es individual, un RMD por persona (Carpeta alumnos), deberan hacer pull request de su documento en la carpeta antes del [Martes 04 de Abril a las 11:59 p.m.](examen/)
 
 &nbsp;
 

@@ -1,0 +1,118 @@
+---
+title: "SQL & Data Viz Test"
+date: "Marzo de 2023"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## {.tabset .tabset-fade .tabset-pills}
+
++ Instrucciones
++ SQL
++ Data Viz (R)
+
+### Instrucciones
+
+La prueba es individual, deberán generar un RMD por persona y ponerlo en la carpeta alumnos (Data_Transformation_Viz/examen/alumnos/) en el repo de GitHub del curso, deberán hacer pull request de su documento entregable (RMD) en la carpeta antes del **Martes 04 de Abril a las 11:59 p.m.**
+
+&nbsp;
+
+Para la primera parte de SQL sus queries tendran correr en el editor en línea que usamos en clase, recuerden, se encuentra en W3Schools en el siguiente [link](https://www.w3schools.com/sql/trysql.asp?filename=trysql_select_all) y únicamente deberán poner el query en el RMD como “chunk” sin ejecutar. 
+
+Yo los copiare y validare que corran, asegúrense que “sean reproducibles”.
+
+&nbsp;
+
+Para la segunda parte de Data Visualization deberán generar las tablas y graficas con su creatividad. 
+
+
+&nbsp;
+
+Éxito!
+
+### SQL
+
+&nbsp;
+
+1. Genera un `Query` que seleccione la columna `Address` de la tabla `Customers`. 
+
+```sql
+
+```
+
+&nbsp;
+
+2. Genera un `Query` que seleccione todos los diferentes valores de la columna `City` de la tabla `Customers`. 
+
+```sql
+
+```
+&nbsp;
+
+3. Genera un `Query` que seleccione todos los registros en donde la columna `City` tenga los valores de `Berlin` ó `Madrid`. 
+
+```sql
+
+```
+&nbsp;
+
+4. Completa el siguiente `Query`, elije el JOIN correcto que seleccione todos los registros de la tabla `Customers` mas todas las coincidencias en la tabla `Orders`. 
+
+```sql
+SELECT *
+FROM Orders
+[respuesta aquí]
+ON Orders.CustomerID=Customers.CustomerID;
+```
+&nbsp;
+
+5. Completa el siguiente `Query`, lista el numero de clientes en cada ciudad, y ordena la lista de acuerdo con el mayor numero de clientes de forma descendente. 
+
+```sql
+SELECT [respuesta aquí](CustomerID),City
+FROM Customers
+[respuesta aquí]
+ORDER BY COUNT(CustomerID) DESC;
+```
+
+### Data Viz (R)
+
+1. Importa los datos del archivo en CSV "Market_size" del repo del curso, estos se usarán para las 4 siguientes preguntas. En este chunk deberás poner todas las librerías utilizadas.
+
+```{r error=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(readr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+```
+
+2. Genera una tabla que muestre los precios del 2023 para México de todas las categorías de bebidas.
+
+```{r echo=FALSE,error=FALSE, message=FALSE, warning=FALSE}
+
+```
+
+3. Genera una tabla que muestre por país y por categoría el precio por litro promedio de bebidas de cada año.
+
+```{r echo=FALSE,error=FALSE, message=FALSE, warning=FALSE}
+
+```
+
+Hint. Market Size
+
+4. A partir de la tabla anterior, genera un gráfico que muestre solo los países que inician con la letra "B" y sus precios por año contable. Recuerda usa tu creatividad, puedes usar geometrías vistas en clase u otras nuevas!
+
+```{r echo=FALSE,error=FALSE, message=FALSE, warning=FALSE}
+
+```
+
+5. Genera un mapa de calor, que muestre al menos 1 de los dos valores numéricos de los datos de Market (Litros o Precios) en función de cualquier variable. Se creativo con los colores!
+
+```{r warning=F, error=F, message=F}
+
+```
+
+&nbsp;
