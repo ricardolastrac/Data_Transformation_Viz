@@ -1,0 +1,121 @@
+---
+title: "EXAMENMODULO6"
+author: "Softovarr"
+date: "2023-03-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{sql connection=}
+SELECT Address FROM Customers;
+```
+
+```{sql connection=}
+SELECT DISTINCT City FROM Customers;
+```
+
+```{sql connection=}
+SELECT * FROM Customers WHERE City IN ('Berlin', 'Madrid');
+```
+
+```{sql connection=}
+SELECT *
+FROM Customers
+LEFT JOIN Orders
+ON Orders.CustomerID = Customers.CustomerID;
+```
+
+```{sql connection=}
+SELECT City, COUNT(CustomerID) as num_clientes
+FROM Customers
+GROUP BY City
+ORDER BY num_clientes DESC;
+```
+
+```{r}
+#Importa los datos del archivo en CSV “Market_size” del repo del curso, 
+#estos se usarán para las 4 siguientes preguntas. 
+#En este chunk deberás poner todas las librerías utilizadas.
+
+library(tidyverse)
+library(dplyr)
+library(readr)
+library(data.table)
+market <- read_csv("C:/Users/sofit/CD3001B/R/Data_Transformation_Viz/data/Market_size.csv", skip = 5, n_max =5)
+market_ <- fread("C:/Users/sofit/CD3001B/R/Data_Transformation_Viz/data/Market_size.csv", skip = 5, sep = ",", header = T)
+head(market_,5)
+
+#Conociendo el data frame:
+class(market_)
+glimpse(market_)
+summary(market_)
+head(market_)
+tail(market_)
+
+#Transformando el data frame a valores numericos no strings:
+df_m <- market_ %>%
+  mutate(dosmil_17 = as.numeric(market_$"2017",na.rm=T),
+         dosmil_18 = as.numeric(market_$"2018",na.rm=T),
+         dosmil_19 = as.numeric(market_$"2019",na.rm=T),
+         dosmil_20 = as.numeric(market_$"2020",na.rm=T),
+         dosmil_21 = as.numeric(market_$"2021",na.rm=T),
+         dosmil_22 = as.numeric(market_$"2022",na.rm=T),
+         dosmil_23 = as.numeric(market_$"2023",na.rm=T)) %>%
+  view
+names(df_m)
+
+df_m <- df_m %>%
+  drop_na(`dosmil_23`, `dosmil_22`, `dosmil_21`, `dosmil_20`, `dosmil_19`, `dosmil_18`, Geography, Category, "Data Type", Unit, "Current Constant") %>%
+  view()
+
+#1.Genera una tabla que muestre los precios del 2023 para México de todas las categorías de bebidas.
+market_tabla1 <- df_m %>%
+  filter(Geography == "Mexico") %>%
+  select("Geography","Category", "dosmil_23") %>%
+  arrange(`dosmil_23`) %>%
+  view
+  
+#2.Genera una tabla que muestre por país y por categoría el precio por litro promedio de bebidas de cada año.
+market_tabla2 <- df_m %>%
+  select("Category", "Geography", starts_with("dos")) %>%
+  group_by(Geography, Category) %>%
+  summarise(across(starts_with("dos"), mean)) %>%
+  view
+  
+#3. A partir de la tabla anterior, genera un gráfico que muestre solo los países que inician con la letra “B” y sus precios por año contable.
+#Recuerda usa tu creatividad, puedes usar geometrías vistas en clase u otras nuevas!
+
+datos_filtrados <- df_m %>% filter(substr(Geography, 1, 1) == "B")
+datos_largos <- pivot_longer(datos_filtrados, cols = c(`dosmil_23`, `dosmil_22`, `dosmil_21`, `dosmil_20`, `dosmil_19`, `dosmil_18`), names_to = "año", values_to = "precio")
+grafico_paleta <- ggplot(datos_largos, aes(x = año, y = Geography, fill = precio)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "navyblue")
+print(grafico_paleta)
+
+grafico_burbujas <- ggplot(datos_largos, aes(x = año, y = Geography, size = precio, color = Geography)) +
+  geom_point() +
+  scale_size(range = c(0.5, 25)) +
+  scale_color_manual(values = c("red", "green", "purple", "orange"))
+print(grafico_burbujas)
+
+grafico_puntos <- ggplot(datos_largos, aes(x = año, y = precio, color = Geography)) +
+  geom_point() +
+  facet_wrap(~Geography, ncol = 1) +
+  scale_color_manual(values = c("Bangladesh" = "deeppink", "Belgium" = "yellow", "Bolivia" = "gold", "Brazil" = "darkorchid"))
+print(grafico_puntos)
+
+#Genera un mapa de calor, que muestre al menos 1 de los dos valores numéricos de los datos de Market (Litros o Precios) en función de cualquier variable. Se creativo con los colores!
+mapa_calor <- ggplot(datos_largos, aes(x = año, y = Category, fill = precio)) +
+  geom_tile() +
+  scale_fill_gradient(low = "grey100", high = "aquamarine4")
+print(mapa_calor)
+```
+
+
+
+
