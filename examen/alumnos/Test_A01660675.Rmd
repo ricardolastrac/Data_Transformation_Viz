@@ -36,7 +36,7 @@ WHERE "City" = "Berlin" OR "City" = "Madrid"
 
 SELECT *
 FROM Orders
-FULL JOIN Orders 
+LEFT JOIN Orders #Para obtener la tabla izquierda + las coincidencias de la derecha.  
 ON Orders.CustomerID=Customers.CustomerID;
 
 5. Completa el siguiente Query, lista el numero de clientes en cada ciudad, y ordena la lista de acuerdo con el mayor numero de clientes de forma descendente.
@@ -58,6 +58,9 @@ library(tidyr)
 library(stringr)
 library(ggplot2)
 library(data.table)
+library(gplots)
+install.packages("pheatmap")
+library(pheatmap)
 
 ```
 
@@ -104,4 +107,20 @@ ggplot(data = tabla1, aes( x = Anio, y = Precio, colour = Geography, fill = Geog
 
 ggplot(tabla, aes(x = Anio, y = Precio)) + geom_col(aes(color = Category, fill = Category), position = position_stack())
 
+```
+
+Intenté varios métodos más pero no pude correrlos de manera correcta.. :(
+
+```{r}
+
+tablamat = matrix(tabla)
+image(tabla, col = heat.colors(10))
+
+ggplot(melt(tabla), aes(x = Anio, y = Precio, fill = Precio)) +
+  geom_tile() +
+  scale_fill_gradientn(colours = c("white", "red"))
+
+heatmap(datos, col = colorRampPalette(c("white", "red")))
+
+image(datos, col = colorRampPalette(c("white", "red")))
 ```
