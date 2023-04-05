@@ -1,0 +1,95 @@
+---
+title: "Quiz_SQL&Viz"
+author: "Sara Laniado"
+date: "2023-04-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{sql connection=}
+#1
+SELECT Address FROM Customers;
+	
+#2
+SELECT DISTINCT City FROM Customers;
+
+#3
+SELECT * FROM Customers 
+WHERE City = 'Madrid' OR City = 'Berlin';
+
+#4
+SELECT *
+FROM Customers
+LEFT JOIN Orders
+ON Orders.CustomerID=Customers.CustomerID;
+
+#5
+SELECT COUNT (CustomerID),City
+FROM Customers
+GROUP BY City
+ORDER BY COUNT(CustomerID) DESC;
+```
+
+```{r}
+
+#1
+library(dplyr)
+library(readr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+
+bebidas <- read_csv("C:/Users/saril/Desktop/InteligenciaArtificial/R/Data_Transformation_Viz/data/Market_size.csv", skip = 5)
+bebidas
+
+#2
+bebidasmx <- filter(bebidas, Geography == "Mexico")
+bebidasmx <- select(bebidasmx, Geography, Category,"2023")
+
+#3
+bebidas_largo <- bebidas %>%
+  pivot_longer(cols = starts_with("20"), names_to = "Año", values_to = "precio_litro")
+
+bebidas_largo$precio_litro <- as.numeric(bebidas_largo$precio_litro)
+
+precio_litro_promedio <- bebidas_largo %>%
+  group_by(Geography, Category, Unit, Año) %>%
+  summarise(precio_litro_promedio = mean(precio_litro), .groups = 'drop')
+
+#4
+precio_litro_promedio_b <- precio_litro_promedio %>% 
+  filter(substr(Geography, 1, 1) == "B")
+
+ggplot(precio_litro_promedio_b, aes(x = Año, y = precio_litro_promedio, fill = Category)) + 
+  geom_col(position = "dodge") +
+  facet_wrap(~ Geography, ncol = 2) +
+  labs(x = "Año", y = "Precio x litro promedio", fill = "Category") +
+  theme_bw()
+
+```
+```{r}
+#5
+library(RColorBrewer)
+
+categorias_unicas <- unique(bebidas_largo$Category)
+categorias_unicas <- categorias_unicas[1:12]
+num_colores <- length(categorias_unicas)
+colores <- brewer.pal(num_colores, "Paired")
+
+ggplot(bebidas_largo, aes(x=Año, y=precio_litro, fill=Category)) +
+  geom_tile() +
+  scale_fill_manual(values = setNames(colores, categorias_unicas)) +
+  labs(x = "Año", y = "Precio por Litro", fill = "Category") + 
+  theme_get()
+
+
+
+
+
+```
+
