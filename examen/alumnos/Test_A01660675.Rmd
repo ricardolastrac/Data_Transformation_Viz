@@ -1,0 +1,107 @@
+---
+title: "DataTransformation"
+output: html_document
+date: "2023-04-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Test SQL Viz 
+
+## Inteligencia Artificial 
+
+### Daniel Esteban Marín Herrera 
+
+## SQL 
+
+1. Genera un Query que seleccione la columna Address de la tabla Customers.
+
+SELECT "Adress"
+FROM Customers
+
+2. Genera un Query que seleccione todos los diferentes valores de la columna City de la tabla Customers.
+
+SELECT "City"
+FROM Customers
+
+3. Genera un Query que seleccione todos los registros en donde la columna City tenga los valores de Berlin ó Madrid.
+
+SELECT *
+FROM Customers
+WHERE "City" = "Berlin" OR "City" = "Madrid"
+
+4. Completa el siguiente Query, elije el JOIN correcto que seleccione todos los registros de la tabla Customers mas todas las coincidencias en la tabla Orders.
+
+SELECT *
+FROM Orders
+FULL JOIN Orders 
+ON Orders.CustomerID=Customers.CustomerID;
+
+5. Completa el siguiente Query, lista el numero de clientes en cada ciudad, y ordena la lista de acuerdo con el mayor numero de clientes de forma descendente.
+
+SELECT COUNT (CustomerID),City
+FROM Customers
+GROUP BY City
+ORDER BY COUNT(CustomerID) DESC;
+
+## Data Viz (R)
+
+1. Importa los datos del archivo en CSV “Market_size” del repo del curso, estos se usarán para las 4 siguientes preguntas. En este chunk deberás poner todas las librerías utilizadas.
+
+```{r}
+
+library(dplyr)
+library(readr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(data.table)
+
+```
+
+2. Genera una tabla que muestre los precios del 2023 para México de todas las categorías de bebidas.
+
+```{r}
+
+datos <- fread("C:/Users/esteb/Downloads/Data_Transformation_Viz/data/Market_size.csv", skip = 5, , sep = ",", header = T)
+
+datosMex <- datos %>%
+  filter(Geography == "Mexico", `Current Constant` == 'Current Prices')
+```
+
+3. Genera una tabla que muestre por país y por categoría el precio por litro promedio de bebidas de cada año.
+
+```{r}
+
+tabla <- datos %>%
+  mutate(across(6:12, as.numeric)) %>%
+  filter(`Current Constant` == "Current Prices") %>%
+  group_by(Category) 
+
+tabla <- gather(tabla, key = "Anio", value = "Precio", (6:12))
+```
+
+4. A partir de la tabla anterior, genera un gráfico que muestre solo los países que inician con la letra “B” y sus precios por año contable. Recuerda usa tu creatividad, puedes usar geometrías vistas en clase u otras nuevas!
+
+```{r}
+
+tabla1 <- datos %>%
+  mutate(across(6:12, as.numeric)) %>%
+  filter(`Current Constant` == "Current Prices") %>%
+  filter(str_sub(Geography, 1, 1) == "B") %>%
+  group_by(Category) 
+
+tabla1 <- gather(tabla1, key = "Anio", value = "Precio", (6:12))
+
+ggplot(data = tabla1, aes( x = Anio, y = Precio, colour = Geography, fill = Geography)) + geom_bar(stat = "identity", position = "stack") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+5. Genera un mapa de calor, que muestre al menos 1 de los dos valores numéricos de los datos de Market (Litros o Precios) en función de cualquier variable. Se creativo con los colores!
+
+```{r}
+
+ggplot(tabla, aes(x = Anio, y = Precio)) + geom_col(aes(color = Category, fill = Category), position = position_stack())
+
+```
