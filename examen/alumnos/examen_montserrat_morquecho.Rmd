@@ -1,0 +1,114 @@
+---
+title: "examen rin"
+output: html_document
+date: '2023-04-03'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{sql connection=}
+SELECT Address
+FROM Customers
+```
+
+```{sql connection=}
+SELECT DISTINCT City
+FROM Customers;
+```
+
+```{sql connection=}
+SELECT *
+FROM Customers
+WHERE City='Madrid' or City='Berlin'
+```
+
+```{sql connection=}
+SELECT *
+FROM Orders
+LEFT JOIN Customers
+ON Orders.CustomerID = Customers.CustomerID;
+```
+
+```{sql connection=}
+SELECT City, COUNT(*) as customers_num
+FROM Customers
+GROUP BY City
+ORDER BY customers_num DESC;
+```
+
+
+```{r}
+library(dplyr)
+library(readr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+
+market <- fread("C:/Users/monts/Desktop/ia-test/data/Data_Transformation_Viz/data/Market_size.csv", skip = 5, sep = ",", header = T)
+print(market)
+
+
+#Genera una tabla que muestre los precios del 2023 para México de todas las categorías de bebidas.
+
+beb_mex  <- market %>%
+  select(Geography, Category, '2023') %>%
+  filter(Geography=="Mexico")
+
+#Genera una tabla que muestre por país y por categoría el precio por litro promedio de bebidas de cada año.
+
+market2 <- market %>%
+  mutate(across(`2017`:`2023`, as.numeric))
+
+precio_litro <- market2 %>%
+  group_by(Geography, Category) %>%
+  summarize(p_2017 = mean(`2017`),
+            p_2018 = mean(`2018`),
+            p_2019 = mean(`2019`),
+            p_2020 = mean(`2020`),
+            p_2021 = mean(`2021`),
+            p_2022 = mean(`2022`),
+            p_2023 = mean(`2023`))
+precio_litro
+str(market)
+
+#TABLA FINAL SIN NAs
+p_litro <- precio_litro %>%
+  summarize(across(starts_with("p"), mean,na.rm=TRUE))
+
+
+#A partir de la tabla anterior, genera un gráfico que muestre solo los países que inician con la letra “B” y sus precios por año contable. Recuerda usa tu creatividad, puedes usar geometrías vistas en clase u otras nuevas!
+
+
+m <- read_csv("C:/Users/monts/Desktop/ia-test/data/Data_Transformation_Viz/data/Market_size.csv", skip = 5)
+m<- m %>%
+  mutate(across(6:12, as.numeric)) 
+m<- gather(m, key = "Año", value = "Prices",
+       (6:12))
+m <- m %>%
+  filter(str_sub(Geography, 1, 1) == "B")%>%
+  mutate(Año= as.numeric(Año)) %>%
+  group_by(Category, Geography, Año) %>%
+  summarise(Precio = sum(Prices, na.rm=TRUE))
+
+
+  
+
+ggplot(data = m, aes(x = Año, y = Precio)) + geom_point(alpha = 0.7, aes(color = Geography, shape = Geography, size=3))
+                         
+
+
+#Genera un mapa de calor, que muestre al menos 1 de los dos valores numéricos de los datos de Market (Litros o Precios) en función de cualquier variable. 
+
+
+ggplot(m, aes(x = Geography, y = Category, fill = Precio)) +
+  geom_tile() +
+  scale_fill_gradient(low="#99CCFF",high="#003399")+
+  labs(title = "Precios por categoria para países que empiezan con B",
+       x = "Pais",
+       y = "Category")+ theme(axis.text.x = element_text(angle = 90,vjust=0.2))
+
+```
+
+
+
