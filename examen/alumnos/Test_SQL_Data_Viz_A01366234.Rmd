@@ -1,0 +1,100 @@
+---
+title: "Test SQL Data Viz"
+author: "Rodrigo Velasco"
+date: "2023-04-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part 1.- SQL Commands
+
+
+```{SQL}
+#SELECT Address FROM Customers
+#SELECT DISTINCT City FROM Customers
+#SELECT * FROM Customers WHERE City = 'Berlin' OR City = 'Madrid'
+#SELECT * FROM Orders RIGHT JOIN Customers ON Orders.CustomerID=Customers.CustomerID;
+#SELECT COUNT(CustomerID),City FROM Customers GROUP BY City ORDER BY COUNT(CustomerID) DESC;
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+#Cargando Librerias
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+
+#importando data de github y leyendo archivo
+urlfile="https://raw.githubusercontent.com/ricardolastrac/Data_Transformation_Viz/main/data/Market_size.csv"
+
+market_size<-read_csv(url(urlfile), skip = 5 )
+
+
+
+#Ejercicio 1: Genera una tabla que muestre los precios del 2023 para México de todas las categorías de bebidas.
+
+mexicodate<-filter(market_size, Geography == "Mexico")
+mexico2023<-select(mexicodate, Geography, Category, 'Current Constant', '2023')
+
+#Ejercicio 2: Genera una tabla que muestre por país y por categoría el precio por litro promedio de bebidas de cada año
+market_size<- market_size %>%
+  mutate(across(6:12, as.numeric)) %>%
+  filter(`Current Constant` == "Current Prices")
+
+agrupado_marketsize<- market_size %>%
+  select(Geography, Category, starts_with("20"))%>%
+  group_by(Geography, Category)%>%
+  summarize(across(starts_with("20"),mean, na.rm = TRUE))
+
+
+
+
+
+#Ejercicio 3: A partir de la tabla anterior, genera un gráfico que muestre solo los países que inician con la letra “B” y sus precios por año contable.
+#manipulacion de df para poder graficar bien
+
+market_size<- gather(market_size, key = "Año", value = "Prices",
+                     (6:12))
+
+
+
+filtro_paisesb <- market_size %>%
+                  filter(str_detect(Geography, "^B")) %>%
+                  group_by(Geography, Category)
+
+ggplot(filtro_paisesb, aes(y = Prices, x = Año, colour = Category)) +
+  geom_point(aes(size = Prices), alpha = 0.4)+
+  ylab("Precio")+
+  xlab("Año")+
+  scale_size(range = c(0.5, 16)) 
+
+#Ejercicio 4: Genera un mapa de calor, que muestre al menos 1 de los dos valores numéricos de los datos de Market (Litros o Precios) en función de cualquier variable. Se creativo con los colores!
+
+#crear paleta de colores. (fuente: color-hex.com)
+colores <- c("#f7fcfd", "#e0ecf4", "#bfd3e6", "#9ebcda", "#8c96c6", "#8c6bb1", "#88419d", "#6e016b")
+
+
+#heatmap
+
+ggplot(market_size, aes(x = Category, y = Geography, fill = Prices)) +
+  geom_tile(color = "white") +
+  scale_fill_gradientn(colors = colores, na.value = "grey90") +
+  theme_minimal() +
+  labs(title = "Prices by Category and Country") +
+  xlab("Category") +
+  ylab("Country")
+
+
+
+
+```
