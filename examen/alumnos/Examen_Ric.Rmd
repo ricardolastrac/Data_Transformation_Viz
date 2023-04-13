@@ -1,0 +1,63 @@
+---
+title: "Test_SQL_Viz_AnaSaborit"
+author: "Ana Saborit"
+date: '2023-04-04'
+output: html_document
+---
+
+```{sql connection=}
+## Genera un Query que seleccione la columna Address de la tabla Customers.
+SELECT Address FROM Customers
+
+## Genera un Query que seleccione todos los diferentes valores de la columna City de la tabla Customers.
+SELECT DISTINCT City FROM Customers 
+
+## Genera un Query que seleccione todos los registros en donde la columna City tenga los valores de Berlin ó Madrid.
+
+SELECT * FROM Customer
+WHERE City IN ('Berlin', 'Madrid');
+
+## Completa el siguiente Query, elije el JOIN correcto que seleccione todos los registros de la tabla Customers mas todas las coincidencias en la tabla Orders.
+
+SELECT * FROM Customers
+RIGHT JOIN Orders
+ON Orders.CustomerID=Customers.CustomerID;
+
+## Completa el siguiente Query, lista el numero de clientes en cada ciudad, y ordena la lista de acuerdo con el mayor numero de clientes de forma descendente.
+
+SELECT COUNT(CustomerID) as NumClientes, City
+FROM Customers
+GROUP BY City
+ORDER BY NumClientes DESC;
+```
+
+library(dplyr)
+library(readr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(data.table)
+
+market_ <- fread("/Users/ana/desktop/clase-r/Data_Transformation_Viz/data/Market_size.csv", skip = 5, sep = ",", header = T)
+
+#Genera una tabla que muestre los precios del 2023 para México de todas las categorías de bebidas.
+
+precios_mex_23 <- market_ %>%
+  filter(Geography  == "Mexico") %>%
+  filter(precios_mex_23, Current Constant == "Current Prices")
+
+# Genera una tabla que muestre por país y por categoría el precio por litro promedio de bebidas de cada año.
+
+litro_prom <- market_ %>%
+  mutate(across(6:12, as.numeric)) %>%
+  group_by(Category, Geography)
+  
+  
+# Genera un gráfico que muestre solo los países que inician con la letra “B” y sus precios por año contable
+  
+Grafico1 <- litro_prom %>%
+  Str_sub(Geography,1,1) == “B”
+  
+  
+
+ 

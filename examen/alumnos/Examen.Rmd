@@ -1,0 +1,152 @@
+---
+title: "ExamenRic_A01366889"
+author: "Sebastian"
+date: "04/04/2023"
+output: html_document
+---
+
+## Primera parte SQL
+
+# Ejercicio 1
+
+SELECT Address
+FROM Customers;
+
+
+# Ejercicio 2
+
+
+SELECT DISTINCT City
+FROM Customers;
+
+
+# Ejercicio 3
+
+
+SELECT * FROM Customers
+WHERE City = 'Berlin' OR City = 'Madrid';
+
+
+# Ejercicio 4
+
+
+SELECT * FROM Customers
+LEFT JOIN Orders
+ON Customers.CustomerID = Orders.CustomerID;
+
+
+# Ejercicio 5
+
+SELECT COUNT(CustomerID) AS NumClientes, City FROM Customers
+GROUP BY City
+ORDER BY COUNT(CustomerID) DESC;
+
+
+## Segunda parte Data Viz
+
+
+```{r}
+
+# Ejercicio 1
+
+library(dplyr)
+library(readr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+
+library (tidyverse)
+read_csv("C:/Users/Tanca/Documents/R/Data_Transformation_Viz/data/Market_size.csv")
+
+
+# Ejercicio 2
+
+library(data.table)
+library(dplyr)
+
+market <- fread("C:/Users/Tanca/Documents/R/Data_Transformation_Viz/data/Market_size.csv", skip = 5, sep = ",", header = TRUE)
+
+market <- as.data.table (type.convert(market, as.is = TRUE))
+
+precios_mx <- market %>%
+  select (Geography, Category, `2023`) %>%
+  filter (Geography == "Mexico")
+
+precios_mx_gb <- precios_mx %>%
+  group_by (Category) %>%
+  summarise (mean_price_2023 = mean(`2023`, na.rm = TRUE))
+
+precios_mx_gb
+
+
+#Ejercicio 3
+
+pl <- market %>%
+  mutate (across(`2017`: `2023`, as.numeric)) %>%
+  group_by(Geography, Category)
+
+
+#Ejercicio 4
+
+pl_viz <- market %>%
+  mutate (across(`2017`: `2023`, as.numeric)) %>%
+  filter (`Current Constant` == "Current Prices") %>%
+  filter (str_sub (Geography, 1, 1) == "B") %>%
+  group_by (Category) 
+
+pl_viz <- gather(pl_viz, key = "Año", value = "Precio", (6:12))
+
+ggplot (data = pl_viz, aes(x = Año, y = Precio, color = Geography, fill = Geography)) + 
+  geom_bar (stat = "identity", position = position_stack(reverse = TRUE)) +
+  scale_color_brewer (palette = "Dark2") +
+  scale_fill_brewer (palette = "Dark2") +
+  theme(axis.text.x = element_text(angle = 50, vjust = 0.5, hjust = 1)) +
+  labs (title = "Precio promedio por año y país",
+       x = "Año", y = "Precio por litro")
+
+
+#Ejercicio 5
+
+ggplot (pl_viz, aes(x = Año, y = Precio)) +
+  geom_tile() +
+  scale_fill_gradient(low = "orange", high = "red") +
+  labs(title = "Heatmap de Precio vs Año", x = "Año", y = "Precio") +
+  theme_classic()
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
